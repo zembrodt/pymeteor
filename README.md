@@ -1,2 +1,4 @@
-# pymeteor
-Python implementation of METEOR
+# PyMETEOR
+Python implementation of METEOR.
+
+https://en.wikipedia.org/wiki/METEOR
