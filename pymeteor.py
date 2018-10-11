@@ -53,7 +53,6 @@ class Line:
                 (self.point1.y <= py and py <= self.point2.y)) or not\
                 ((line.point1.x <= px and px <= line.point2.x) or\
                  (line.point1.y <= py and py <= line.point2.y)):
-            #print('FALSE! (%.4f, %.4f) does not lie within the two lines'%(px,py))
             return False
         return True
 
@@ -78,7 +77,6 @@ def create_map(r, c):
                     m[i].append(j)
                 else:
                     m[i] = [j]
-    print('m=%s'%str(m))
     return m
 
 def generate_alignments(m, keys):
@@ -125,26 +123,21 @@ def calculate_chunks(reference, candidate):
             min_alignments = [alignment]
         elif length == min_len:
             min_alignments.append(alignment)
-    print('Min alignment len: %d\nMin alignment: %s'%(min_len, str(min_alignments)))
 
     # If > 1 alignment, iterate over each, convert to lines on a graph, count intersections
     if len(min_alignments) > 1:
-        print('We need to find alignment with fewest intersections')
         min_intersections = None
         min_intersection_alignments = []
         for alignment in min_alignments:
             intersections = count_intersections(alignment)
-            print('Alignment: %s\nIntersections: %d'%(alignment, intersections))
             if min_intersections is None or intersections < min_intersections:
                 min_intersections = intersections
                 min_intersection_alignments = [alignment]
             elif intersections == min_intersections:
                 min_intersection_alignments.append(alignment)
         # Return alignment with lowest number of intersections
-        print('Minimum intersections: %d\nMin intersections alignments: %s'%(min_intersections,min_intersection_alignments))
         if len(min_intersection_alignments) > 0:
             # If > 1 alignment, return one at random
-            print('We have more than 1 minimum intersection alignment! Picking one randomly!')
             min_alignment = random.choice(min_intersection_alignments)
     elif len(min_alignments) == 1:
         min_alignment = min_alignments[0]
@@ -213,17 +206,25 @@ def meteor(reference, candidate, print_details=False):
     if print_details:
         print('Reference: "%s"' % reference)
         print('Candidate: "%s"' % candidate)
+        
+    reference_set = set(reference.split())
+    candidate_set = set(candidate.split())
+    if len(reference_set.intersection(candidate_set)) == 0:
+        if print_details:
+            print('Reference and candidate sentences have no matching words')
+        return 0.0
+    
     P = unigram_precision(reference, candidate)
     R = unigram_recall(reference, candidate)
     f_mean = harmonic_mean(P, R)
     penalty = calculate_penalty(reference, candidate, ret_details=print_details)
     penalty_val = penalty[0]
-    chunks = penalty[1]
-    mappings = penalty[2]
     M = calculate_meteor(f_mean, penalty_val)
-    fragmentation = chunks/float(mappings)
+    
     if print_details:
-        print('Reference: %s\nCandidate: %s'%(reference, candidate))
+        chunks = penalty[1]
+        mappings = penalty[2]
+        fragmentation = chunks/float(mappings)
         print('Score: %.4f = Fmean: %.4f * (1 - Penalty: %.4f)' % (M, f_mean, penalty_val))
         print('Fmean: %.4f = 10 * Precision: %.4f * Recall: %.4f / (Recall: %.4f + 9 * Precision: %.4f)' % (f_mean, P, R, R, P))
         print('Penalty: %.4f = 0.5 * (Fragmentation: %.4f ^3)' % (penalty_val, fragmentation))
