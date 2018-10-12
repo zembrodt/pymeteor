@@ -50,25 +50,17 @@ Below is an example of a reference and candidate string and their unigram's corr
 | --- | --- | --- | --- | --- | --- | --- |
 | **reference** | the | cat | sat | on | the | mat | 
 | **candidate** | on | the | mat | sat | the | cat |
-One possible alignment between these two strings is:
-> reference[0] &rarr; candidate[1]<br/>
-> reference[1] &rarr; candidate[5]<br/>
-> reference[2] &rarr; candidate[3]<br/>
-> reference[3] &rarr; candidate[0]<br/>
-> reference[4] &rarr; candidate[4]<br/>
-> reference[5] &rarr; candidate[2]<br/>
 
-Another possible alignment:
-> reference[0] &rarr; candidate[4]<br/>
-> reference[1] &rarr; candidate[5]<br/>
-> reference[2] &rarr; candidate[3]<br/>
-> reference[3] &rarr; candidate[0]<br/>
-> reference[4] &rarr; candidate[1]<br/>
-> reference[5] &rarr; candidate[2]<br/>
+Two possible alignments between these strings are:
 
-With the difference being which "*the*" in the reference is mapped to the "*the*" in the candidate.
+<img src="https://upload.wikimedia.org/wikipedia/commons/2/27/METEOR-alignment-a.png" alt="Alignment A" height="87" />
 
-The METEOR algorithm calls for the alignment with the fewest amount of mappings to be chosen. Since both of these alignments have 6 mappings, we much choose the mapping that has the fewest amount of *intersections*. This is done by creating points on a graph for each word, with their X-value being their index in the string, and their Y-value corresponding with being in the reference or candidate string (0 or 1, for example). If you imagine drawing the above alignments as lines between each of their corresponding unigrams in the table above,  we can count how many of these lines intersect.
+<img src="https://upload.wikimedia.org/wikipedia/commons/7/78/METEOR-alignment-b.png" alt="Alignment B" height="87" /><br/>
+*<sup>[Images linked from Wikipedia](https://en.wikipedia.org/wiki/METEOR)</sup>*
+
+The difference between these examples are which "*the*" in the reference string is mapped with which "*the*" in the candidate string.
+
+The METEOR algorithm calls for the alignment with the fewest amount of mappings to be chosen. Since both of these alignments have 6 mappings, we much choose the mapping that has the fewest amount of *intersections*. This is done by creating points on a graph for each word, with their X-value being their index in the string, and their Y-value corresponding with being in the reference or candidate string (0 or 1, for example). Illustrated above are the alignments with mappings drawn as lines. Calculating this, we can now count how many of these lines intersect.
 
 In the above example, the first alignment will be chosen as it has 8 intersections, while the second alignment has 11 intersections. This gives us a final *c* value of 6, and a *u<sub>m</sub>* value of 6.
 
