@@ -13,6 +13,13 @@ class Point:
     def __repr__(self):
         return '(%d, %d)'%(self.x, self.y)
 
+    def cross_product(self, point):
+        return self.x * point.y - self.y * point.x
+    def subtract(self, point):
+        return Point(self.x - point.x, self.y - point.y)
+    def equals(self, point):
+        return self.x == point.x and self.y == point.y
+
 # Defines a Cartesian line made of two Points.
 class Line:
     def __init__(self, point1, point2):
@@ -20,40 +27,33 @@ class Line:
         self.point2 = point2
     def __repr__(self):
         return '<%s, %s>'%(self.point1, self.point2)
+
     def intersects(self, line):
-        p_num1 = [[self.point1.x, self.point1.y], [self.point2.x, self.point2.y]]
-        px_num2 = [[self.point1.x, 1], [self.point2.x, 1]]
-        p_num3 = [[line.point1.x, line.point1.y], [line.point2.x, line.point2.y]]
-        px_num4 = [[line.point1.x, 1], [line.point2.x, 1]]
+        # Get the difference between the points on each line
+        r = self.point2.subtract(self.point1)
+        s = line.point2.subtract(line.point1)
 
-        py_num2 = [[self.point1.y, 1], [self.point2.y, 1]]
-        py_num4 = [[line.point1.y, 1], [line.point2.y, 1]]
+        u_numerator = line.point1.subtract(self.point1).cross_product(r)
+        denominator = r.cross_product(s)
 
-        p_det1 = px_num2
-        p_det2 = py_num2
-        p_det3 = px_num4
-        p_det4 = py_num4
+        # Check if lines are collinear
+        if u_numerator == 0 and denominator == 0:
+            # Check if any of the endpoints are equal
+            if self.point1.equals(line.point1) or self.point1.equals(line.point2) or self.point2.equals(line.point1) or self.point2.equals(line.point2):
+                return True
+            x_check = [line.point1.x - self.point1.x < 0, line.point1.x - self.point2.x < 0, line.point2.x - self.point1.x < 0, line.point2.x - self.point2.x < 0]
+            y_check = [line.point1.y - self.point1.y < 0, line.point1.y - self.point2.y < 0, line.point2.y - self.point1.y < 0, line.point2.y - self.point2.y < 0]
 
-        px_num = [[det(p_num1), det(px_num2)], [det(p_num3), det(px_num4)]]
-        py_num = [[det(p_num1), det(py_num2)], [det(p_num3), det(py_num4)]]
-        p_det = det([[det(px_num2), det(py_num2)], [det(px_num4), det(py_num4)]])
-
-        # Lines are parallel
-        if p_det == 0:
+            return not (all(x_check) or all([not e for e in x_check])) or not (all(y_check) or all([not e for e in y_check]))
+        # Check if lines are parallel
+        elif denominator == 0:
             return False
-			
-        px = det(px_num) / float(p_det)
-        py = det(py_num) / float(p_det)
-		
-        # Check intersection is within the two lines
-        # Check that x1 <= px <= x2 or y1 <= py <= y2
-        if not ((self.point1.x <= px and px <= self.point2.x) or\
-                (self.point1.y <= py and py <= self.point2.y)) or not\
-                ((line.point1.x <= px and px <= line.point2.x) or\
-                 (line.point1.y <= py and py <= line.point2.y)):
-            return False
-        return True
 
+        u = u_numerator / denominator
+        t = line.point1.subtract(self.point1).cross_product(s) / denominator
+
+        return t >= 0 and t <= 1 and u >= 0 and u <= 1
+    
 # Find all alignments between two sentences
 def _count_intersections(lines):
     intersection_count = 0
