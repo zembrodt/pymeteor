@@ -1,15 +1,14 @@
 # PyMETEOR
 Python implementation of METEOR.<br/>
 This module is dependent on the following packages:
-- numpy
 - nosetests (for testing only)
 
-#### References and credits
+### References and credits
 [METEOR: An Automatic Metric for MT Evaluation with
 Improved Correlation with Human Judgments](https://www.cs.cmu.edu/~alavie/papers/BanerjeeLavie2005-final.pdf) by Satanjeev Banerjee and Alon Lavie.<br/>
 [Wikipedia article](https://en.wikipedia.org/wiki/METEOR)
 
-#### Formulas
+### Formulas
 This program implements the formulas mentioned within the algorithm as separate functions.
 
 Unigram precision *P* is calculated as:
@@ -40,7 +39,7 @@ The final score, *M*, is calculated as:
 
 In the program this is covered by `calculate_meteor(f_mean, penalty)`
 
-#### Mappings and chunks
+### Mappings and chunks
 The values for *c* and *u<sub>m</sub>*, used above in the penalty, are calculated in the function `calculate_chunks(reference, candidate)`
 
 To do this, the program creates an alignment, or a set of mappings between unigrams within the two strings. *u<sub>m</sub>* is the length of this set of mappings. *c* is the amount of chunks in the alignment, where a chunk is a set of mappings where the unigrams are adjacent in both strings.<br/>

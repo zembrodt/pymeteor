@@ -3,7 +3,6 @@
 
 import copy
 import random
-from numpy.linalg import det
 
 # Defines a Cartesian point
 class Point:

@@ -1,5 +1,2 @@
-## Requirements for pymeteor ##
-numpy
-
 # Used to run test cases
 nose
