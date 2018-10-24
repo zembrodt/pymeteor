@@ -1,2 +1,5 @@
+build/
+dist/
+pymeteor.egg-info/
 pymeteor/__pycache__/
 tests/__pycache__/
