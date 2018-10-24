@@ -1,7 +1,7 @@
 # PyMETEOR
 A Python implementation of METEOR, an automatic metric to evaluate machine translations.
 
-### Installation
+## Installation
 The easiest way to install pymeteor is from the Test PyPI repository:<br/>
 `pip install --index-url https://test.pypi.org/simple/ pymeteor`
 
@@ -11,7 +11,10 @@ This module is dependent on the following packages:
 To install the dependencies, if not installing pymeteor via pip, use the `requirements.txt` file:<br/>
 `pip install -r requirements.txt`
 
-### Usage
+Alternatively, to run the test cases, nosetests must be used:
+`pip install nose`
+
+## Usage
 The `meteor` function within the pymeteor package requires reference and candidate strings where each word, or unigram, is separated by whitespace. The function will return the METEOR score as a float.
 ```python
 import pymeteor.pymeteor as pymeteor
@@ -39,7 +42,7 @@ meteor_score = pymeteor.meteor(reference, candidate, print_details=True)
 >>> Fragmentation: 1.0000 = Chunks: 6.0000 / Matches: 6.0000 
 ```
 
-### Formulas
+## Formulas
 This program implements the formulas mentioned within the algorithm.
 
 Unigram precision *P* is calculated as:
@@ -69,7 +72,7 @@ The final score, *M*, is calculated as:
 
 In the program this is covered by `_calculate_meteor(f_mean, penalty)`
 
-### Mappings and chunks
+## Mappings and chunks
 The values for *c* and *u<sub>m</sub>*, used above in the penalty, are calculated in the function `_calculate_chunks(reference, candidate)`
 
 To do this, the program creates an alignment, or a set of mappings between unigrams within the two strings. *u<sub>m</sub>* is the length of this set of mappings. *c* is the amount of chunks in the alignment, where a chunk is a set of mappings where the unigrams are adjacent in both strings.<br/>
@@ -93,13 +96,13 @@ The METEOR algorithm calls for the alignment with the fewest amount of mappings 
 
 In the above example, the first alignment will be chosen as it has 8 intersections, while the second alignment has 11 intersections. This gives us a final *c* value of 6, and a *u<sub>m</sub>* value of 6.
 
-### References and credits
+## References and credits
 [METEOR: An Automatic Metric for MT Evaluation with
 Improved Correlation with Human Judgments](https://www.cs.cmu.edu/~alavie/papers/BanerjeeLavie2005-final.pdf) by Satanjeev Banerjee and Alon Lavie.<br/>
 [Wikipedia article](https://en.wikipedia.org/wiki/METEOR)
 
-### License
+## License
 This project is licensed under the MIT License, please see the [LICENSE](LICENSE) file for details.
 
-### Author's note
+## Author's note
 Please feel free to contribute to the project or notify me of any bugs in the code or improvements to be made. Thanks.
