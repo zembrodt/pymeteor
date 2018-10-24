@@ -160,8 +160,8 @@ def _calculate_meteor(f_mean, penalty):
 #   Note: if neither reference or candidate strings have a matching unigram, the score is 0
 def meteor(reference, candidate, print_details=False):
     if print_details:
-        print('Reference: "%s"' % reference)
-        print('Candidate: "%s"' % candidate)
+        print('Reference: "{}"'.format(reference))
+        print('Candidate: "{}"'.format(candidate))
     
     reference_unigrams = reference.split()
     candidate_unigrams = candidate.split()
@@ -169,7 +169,7 @@ def meteor(reference, candidate, print_details=False):
     candidate_set = set(candidate_unigrams)
     if len(reference_set.intersection(candidate_set)) == 0:
         if print_details:   
-            print('Reference and candidate sentences have no matching unigrams')
+            print('Reference and candidate sentences have no matching unigrams.')
         return 0.0
     
     P, R = _unigram_precision_and_recall(reference_unigrams, candidate_unigrams)
@@ -182,9 +182,8 @@ def meteor(reference, candidate, print_details=False):
         chunks = penalty[1]
         mappings = penalty[2]
         fragmentation = chunks/float(mappings)
-        print('Score: %.4f = Fmean: %.4f * (1 - Penalty: %.4f)' % (M, f_mean, penalty_val))
-        print('Fmean: %.4f = 10 * Precision: %.4f * Recall: %.4f / (Recall: %.4f + 9 * Precision: %.4f)' % (f_mean, P, R, R, P))
-        print('Penalty: %.4f = 0.5 * (Fragmentation: %.4f ^3)' % (penalty_val, fragmentation))
-        print('Fragmentation: %.4f = Chunks: %.4f / Matches: %.4f' % (fragmentation, chunks, mappings))
-        print()
+        print('Score: {:.4f} = Fmean: {:.4f} * (1 - Penalty: {:.4f})'.format(M, f_mean, penalty_val))
+        print('Fmean: {0:.4f} = 10 * Precision: {1:.4f} * Recall: {2:.4f} / (Recall: {2:.4f} + 9 * Precision: {1:.4f})'.format(f_mean, P, R))
+        print('Penalty: {:.4f} = 0.5 * (Fragmentation: {:.4f} ^3)'.format(penalty_val, fragmentation))
+        print('Fragmentation: {:.4f} = Chunks: {:.4f} / Matches: {:.4f}'.format(fragmentation, chunks, mappings))
     return M
