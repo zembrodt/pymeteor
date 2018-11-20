@@ -3,8 +3,8 @@ from pymeteor import pymeteor
 
 # Assert two strings with 0 matching words give a value of 0
 def test_meteor0():
-    reference = 'this is a test'
-    candidate = 'i also am one'
+    reference = 'this is   a  test'
+    candidate = 'i    also am one'
 
     meteor_score = pymeteor.meteor(reference, candidate)
     
@@ -36,4 +36,5 @@ def test_meteor3():
     print('meteor_score: %.4f'%meteor_score)
     assert round(meteor_score, 4) == 0.9654
 
-
+# TODO: Add tests for other methods within pymeteor.py
+# TODO: Split Point/Line into separate modules? Add tests?

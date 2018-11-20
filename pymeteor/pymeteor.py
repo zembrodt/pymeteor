@@ -5,69 +5,81 @@ import collections
 import copy
 import itertools
 import random
+from collections import namedtuple
+import time
 
-# Defines a Cartesian point
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-    def __repr__(self):
-        return '(%d, %d)'%(self.x, self.y)
-    # Calculate the cross product with another point
-    def cross_product(self, point):
-        return self.x * point.y - self.y * point.x
-    # Subtract a point from itself
-    def subtract(self, point):
-        return Point(self.x - point.x, self.y - point.y)
-    # Check if two points have the same values
-    def equals(self, point):
-        return self.x == point.x and self.y == point.y
+# Constant indexes for accessing points and lines
+X = 0
+Y = 1
+POINT1 = 0
+POINT2 = 1
 
-# Defines a Cartesian line segment made of two Points.
-class Line:
-    def __init__(self, point1, point2):
-        self.point1 = point1
-        self.point2 = point2
-    def __repr__(self):
-        return '<%s, %s>'%(self.point1, self.point2)
-    # Intersection of two line segments
-    def intersects(self, line):
-        # Get the difference between the points on each line
-        r = self.point2.subtract(self.point1)
-        s = line.point2.subtract(line.point1)
+# Defines a cartesian point
+def Point(x, y):
+    return (x, y)
+# Defines a cartesian line segment
+def Line(line1, line2):
+    return (line1, line2)
 
-        numerator = line.point1.subtract(self.point1).cross_product(r)
-        denominator = r.cross_product(s)
+# Point methods
+def cross_product(point1, point2):
+    return point1[X] * point2[Y] - point1[Y] * point2[X]
+# Subtract a point from itself
+def subtract(point1, point2):
+    return Point(point1[X] - point2[X], point1[Y] - point2[Y])
+# Check if two points have the same values
+def equals(point1, point2):
+    return point1[X] == point2[X] and point1[Y] == point2[Y]
 
-        # Check if lines are collinear
-        if numerator == 0 and denominator == 0:
-            # Check if any of the endpoints are equal
-            if self.point1.equals(line.point1) or self.point1.equals(line.point2) or \
-                    self.point2.equals(line.point1) or self.point2.equals(line.point2):
-                return True
-            x_check = [line.point1.x - self.point1.x < 0,
-                       line.point1.x - self.point2.x < 0,
-                       line.point2.x - self.point1.x < 0,
-                       line.point2.x - self.point2.x < 0]
-            y_check = [line.point1.y - self.point1.y < 0,
-                       line.point1.y - self.point2.y < 0,
-                       line.point2.y - self.point1.y < 0,
-                       line.point2.y - self.point2.y < 0]
+# Line methods
+def parallel(line1, line2):
+    # Return false if line1 == line2:
+    if equals(line1[POINT1], line2[POINT1]) and equals(line1[POINT2], line2[POINT2]):
+        return False
 
-            return not (all(x_check) or all([not e for e in x_check])) or \
-                    not (all(y_check) or all([not e for e in y_check]))
-        # Check if lines are parallel
-        elif denominator == 0:
-            return False
+    r = subtract(line1[POINT2], line1[POINT1])
+    s = subtract(line2[POINT2], line2[POINT1])
 
-        u = numerator / denominator
-        t = line.point1.subtract(self.point1).cross_product(s) / denominator
+    return cross_product(r, s) == 0
 
-        return t >= 0 and t <= 1 and u >= 0 and u <= 1
-    
+# Intersection of two line segments
+def intersects(line1, line2):
+    # Get the difference between the points on each line
+    r = subtract(line1[POINT2], line1[POINT1])
+    s = subtract(line2[POINT2], line2[POINT1])
+
+    numerator = cross_product(subtract(line2[POINT1], line1[POINT1]), r)
+    denominator = cross_product(r, s)
+
+    # Check if lines are collinear
+    if numerator == 0 and denominator == 0:
+        # Check if any of the endpoints are equal
+        if equals(line1[POINT1], line2[POINT1]) or equals(line1[POINT1], line2[POINT2]) or \
+                equals(line1[POINT2], line2[POINT1]) or equals(line1[POINT2], line2[POINT2]):
+            return True
+        x_check = [line2[POINT1][X] - line1[POINT1][X] < 0,
+                    line2[POINT1][X] - line1[POINT2][X] < 0,
+                    line2[POINT2][X] - line1[POINT1][X] < 0,
+                    line2[POINT2][X] - line1[POINT2][X] < 0]
+        y_check = [line2[POINT1][Y] - line1[POINT1][Y] < 0,
+                    line2[POINT1][Y] - line1[POINT2][Y] < 0,
+                    line2[POINT2][Y] - line1[POINT1][Y] < 0,
+                    line2[POINT2][Y] - line1[POINT2][Y] < 0]
+
+        return not (all(x_check) or all([not e for e in x_check])) or \
+                not (all(y_check) or all([not e for e in y_check]))
+    # Check if lines are parallel
+    elif denominator == 0:
+        return False
+
+    u = numerator / denominator
+    t = cross_product(subtract(line2[POINT1], line1[POINT1]), s) / denominator
+
+    return t >= 0 and t <= 1 and u >= 0 and u <= 1
+ 
 # Count the number of intersections between a list of Lines with each other
 def _count_intersections(lines):
-    return sum([1 for line1, line2 in itertools.combinations(lines, 2) if line1.intersects(line2)])
+    return sum([1 for line1, line2 in itertools.combinations(lines, 2) if intersects(line1,line2)])
 
 # Maps the reference and candidate strings into indices and generates all their possible alignments
 def _get_alignments(reference_unigrams, candidate_unigrams):
@@ -80,7 +92,8 @@ def _get_alignments(reference_unigrams, candidate_unigrams):
     alignments = []
     keys, values = zip(*mapping.items())
     for v in itertools.product(*values):
-        alignments.append([Line(Point(item[0],0), Point(item[1],1)) for item in list(dict(zip(keys, v)).items())])
+        t=[Line(Point(item[0],0), Point(item[1],1)) for item in list(dict(zip(keys, v)).items())]
+        alignments.append(t)
     return alignments
 
 # Calculate how many chunks (as defined by METEOR) between the reference and candidate unigrams
@@ -94,6 +107,15 @@ def _calculate_chunks(reference_unigrams, candidate_unigrams):
 
     # If > 1 alignment, get the alignment with the fewest number of intersections
     if len(min_alignments) > 1:
+        print('num of min_alignments: {}'.format(len(min_alignments)))
+        # O(2^n) min_alignments...
+        # THOUGHTS TO FIX
+        # While initially counting the number of intersections, we can keep a tally of the current min intersection
+        # count, and if the count goes above it, break from processing
+            # Could still potentially not speed things up if every node has equal number of intersections
+        # TODO: We will likely have to find a rough max estimate on this project being efficient
+        # If the comparison will be greater than this limit, have a variable override to let users attempt to calculate
+            # May run out of memory, TODO: figure out how to do alignment/intersection calculations with limited memory footprint?
         min_alignment = min(min_alignments, key=_count_intersections)
     elif len(min_alignments) == 1:
         min_alignment = min_alignments[0]
@@ -109,7 +131,7 @@ def _calculate_chunks(reference_unigrams, candidate_unigrams):
     next(alignment_iter)
     # Compare each line with the previous
     for prev, curr in zip(min_alignment, alignment_iter):
-        if curr.point2.x != prev.point2.x + 1:
+        if curr[POINT2][X] != prev[POINT2][X] + 1:
             chunks += 1
     return chunks, mappings
 
@@ -171,7 +193,6 @@ def meteor(reference, candidate, print_details=False):
         if print_details:   
             print('Reference and candidate sentences have no matching unigrams.')
         return 0.0
-    
     P, R = _unigram_precision_and_recall(reference_unigrams, candidate_unigrams)
     f_mean = _harmonic_mean(P, R)
     penalty = _calculate_penalty(reference_unigrams, candidate_unigrams, ret_details=print_details)
@@ -187,3 +208,45 @@ def meteor(reference, candidate, print_details=False):
         print('Penalty: {:.4f} = 0.5 * (Fragmentation: {:.4f} ^3)'.format(penalty_val, fragmentation))
         print('Fragmentation: {:.4f} = Chunks: {:.4f} / Matches: {:.4f}'.format(fragmentation, chunks, mappings))
     return M
+
+def main():
+    # Current tests on limit for O(2^n) alignments
+    r = 'he '
+    c = "he a a"
+    for i in range(200):
+        if i%10 == 0:
+            r+=('a '*10)
+            print('i={}\nr={}\nc={}'.format(i,r,c))
+            start = time.time()
+            m = meteor(r, c, print_details=True)
+            end = time.time()
+            print('Execution time={:.4f}'.format(end-start))
+    exit()
+    # Old tests
+    r += ('a '*200)
+    r_old = "he 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd a 'd"
+    c_old = "he gives us all a bad name and you know he 's not really even a ghost i say what are you all doing here ?"
+    print('r={}\nc={}'.format(r,c))
+    start = time.time()
+    m = meteor(r, c, print_details=True)
+    end = time.time()
+    print('meteor={:.4f}'.format(m))
+    print('Execution time={:.4f}'.format(end-start))
+    exit()
+    r = ''
+    c = ''
+    with open('pymeteor/test_data.txt') as f:
+        i = 0
+        for line in f.readlines():
+            if i == 0:
+                r = line.strip()
+            elif i == 1:
+                c = line.strip()
+            i += 1
+    print('r={}\nc={}'.format(r,c))
+    m = meteor(r, c, print_details=True)
+    print('meteor={:.4f}'.format(m))
+    print('Execution time={:.4f}'.format(end-start))
+
+if __name__ == '__main__':
+    main()
